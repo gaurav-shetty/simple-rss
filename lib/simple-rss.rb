@@ -83,17 +83,13 @@ class SimpleRSS
         tag = tag_data[0]
         rel = tag_data[1]
         
-        if feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)/\s*>}mi
+        if feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
           nil
-        elsif feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-          nil
-        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)/\s*>}mi
-          nil
-        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
+        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
           nil
         end
         if $3 || $4
-          tag_cleaned = clean_tag("#{tag}+#{rel}")
+          tag_cleaned = clean_tag("#{tag}_#{rel}_data")
           instance_variable_set("@#{ tag_cleaned }", clean_content(tag, $3, $4))
           self.class.send(:attr_reader, tag_cleaned)
         end
@@ -102,13 +98,9 @@ class SimpleRSS
         tag_data = tag.to_s.split("#")
         tag = tag_data[0]
         attrib = tag_data[1]
-        if feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)/\s*>}mi
+        if feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
           nil
-        elsif feed_content and feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-          nil
-        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)/\s*>}mi
-          nil
-        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
+        elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
           nil
         end
         if $3
@@ -117,14 +109,10 @@ class SimpleRSS
           self.class.send(:attr_reader, tag_cleaned)
         end
         next
-      elsif feed_content && feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)\/\s*>}mi
+      elsif feed_content && feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
         nil
-      elsif feed_content && feed_content =~ %r{<(rss:|atom:)?#{tag}(.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-				nil
-			elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)\/\s*>}mi
+			elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
         nil
-      elsif @source =~ %r{<(rss:|atom:)?#{tag}(.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-				nil
 			end
 			
 			if $2 || $3
@@ -143,27 +131,21 @@ class SimpleRSS
 			    tag = tag_data[0]
 			    rel = tag_data[1]
 			    
-  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)/\s*>}mi
+  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
             nil
-          elsif match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)rel=['"]#{rel}['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-  				  nil
   				end
   				item[clean_tag("#{tag}+#{rel}")] = clean_content(tag, $3, $4) if $3 || $4
   			elsif tag.to_s.include?("#")
 			    tag_data = tag.to_s.split("#")
 			    tag = tag_data[0]
 			    attrib = tag_data[1]
-  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)/\s*>}mi
+  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
   				  nil
-          elsif match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)#{attrib}=['"](.*?)['"](.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-            nil
   				end
   				item[clean_tag("#{tag}_#{attrib}")] = clean_content(tag, attrib, $3) if $3
 		    else
-  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)/\s*>}mi
+  				if match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)(?:/\s*>|>(.*?)</(rss:|atom:)?#{tag}>)}mi
   					nil
-          elsif match[3] =~ %r{<(rss:|atom:)?#{tag}(.*?)>(.*?)</(rss:|atom:)?#{tag}>}mi
-            nil
   				end
   				item[clean_tag(tag)] = clean_content(tag, $2, $3) if $2 || $3
 				end
